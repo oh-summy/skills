@@ -6,7 +6,7 @@
 
 目前已包含 [Agnes AI](https://agnes-ai.com) 多模态 skill（图片/视频理解、图片/视频生成），未来会持续补充更多公开或自用的 skill。
 
-[English](./README.md)
+**语言：** [English](./README.md) | [简体中文](./README.zh-CN.md)
 
 ## 快速开始
 
