@@ -31,11 +31,17 @@ npx skills add oh-summy/skills --skill agnes-understand-image -a claude-code
 Or use the bundled installer:
 
 ```bash
-# install one skill globally for all supported agents
-./scripts/install.sh agnes-understand-image
+# install for a specific agent (direct install into ~/.claude/skills/)
+./scripts/install.sh --agent claude agnes-understand-image
 
-# install one skill into project-local agent directories
-./scripts/install.sh agnes-understand-image --project
+# install for multiple agents (~/.agents/skills/ becomes canonical, others symlink)
+./scripts/install.sh --agent claude --agent codex --agent opencode
+
+# install for all supported agents
+./scripts/install.sh --agent all
+
+# install into the cross-runtime ~/.agents/skills/ directory only
+./scripts/install.sh --universal
 
 # list available skills
 ./scripts/install.sh --list

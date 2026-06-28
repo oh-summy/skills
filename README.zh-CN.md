@@ -31,11 +31,17 @@ npx skills add oh-summy/skills --skill agnes-understand-image -a claude-code
 或者使用本仓库自带的安装脚本：
 
 ```bash
-# 全局安装某个 skill 到所有支持的 agent
-./scripts/install.sh agnes-understand-image
+# 安装到指定 agent（直接安装到 ~/.claude/skills/）
+./scripts/install.sh --agent claude agnes-understand-image
 
-# 安装到当前项目的 agent 目录
-./scripts/install.sh agnes-understand-image --project
+# 安装到多个 agent（~/.agents/skills/ 作为 canonical，其他目录软链）
+./scripts/install.sh --agent claude --agent codex --agent opencode
+
+# 安装到所有支持的 agent
+./scripts/install.sh --agent all
+
+# 只安装到跨 agent 的 ~/.agents/skills/ 目录
+./scripts/install.sh --universal
 
 # 列出所有可用 skills
 ./scripts/install.sh --list
