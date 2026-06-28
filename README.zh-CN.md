@@ -28,9 +28,12 @@ npx skills add oh-summy/skills -g -y
 npx skills add oh-summy/skills --skill agnes-understand-image -a claude-code
 ```
 
-或者使用本仓库自带的安装脚本：
+或者使用本仓库自带的安装脚本（不加参数会进入交互式选择）：
 
 ```bash
+# 交互式菜单
+./scripts/install.sh
+
 # 安装到指定 agent（直接安装到 ~/.claude/skills/）
 ./scripts/install.sh --agent claude agnes-understand-image
 

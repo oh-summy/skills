@@ -47,6 +47,7 @@ usage() {
 Usage: install.sh [options] [skill-name]
 
 Install skills from this repo into the agent directories you choose.
+Run without options for an interactive prompt.
 
 Options:
   --agent <agent>   Target agent. Can be repeated. Supported:
@@ -58,6 +59,7 @@ Options:
   -h, --help        Show this help
 
 Examples:
+  ./scripts/install.sh                          # interactive mode
   ./scripts/install.sh --universal
   ./scripts/install.sh --agent claude
   ./scripts/install.sh --agent claude --agent codex --agent opencode
@@ -88,6 +90,51 @@ resolve_agent_dir() {
     fi
   done
   return 1
+}
+
+interactive_select_agents() {
+  # Distinct agents shown to the user (aliases like claude-code share a dir).
+  local choices=("claude" "codex" "opencode" "kimi" "cursor" "gemini")
+
+  echo ""
+  echo "Which agents do you want to install skills for?"
+  local i=1
+  for c in "${choices[@]}"; do
+    echo "  $i) $c"
+    i=$((i + 1))
+  done
+  echo "  0) all of the above"
+  echo "  u) ~/.agents/skills/ only (universal)"
+  echo ""
+
+  read -rp "Enter choices (comma/space separated, e.g. 1,3,5 or 0 or u): " raw_input
+  local input
+  input=$(echo "$raw_input" | tr ',' ' ' | tr -s ' ')
+
+  if [[ "$input" =~ ^[Uu]$ ]]; then
+    UNIVERSAL=1
+    return
+  fi
+
+  if [[ "$input" == "0" || "$input" == "all" ]]; then
+    SELECTED_AGENTS+=("all")
+    return
+  fi
+
+  for token in $input; do
+    if [[ "$token" =~ ^[0-9]+$ ]]; then
+      local idx=$((token - 1))
+      if [[ "$idx" -ge 0 && "$idx" -lt ${#choices[@]} ]]; then
+        SELECTED_AGENTS+=("${choices[$idx]}")
+      else
+        echo "Invalid choice: $token" >&2
+        exit 1
+      fi
+    else
+      # Allow typing agent names directly as well.
+      SELECTED_AGENTS+=("$token")
+    fi
+  done
 }
 
 SELECTED_AGENTS=()
@@ -134,8 +181,19 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# If no target selected, enter interactive mode when stdin is a TTY.
+if [[ ${#SELECTED_AGENTS[@]} -eq 0 && "$UNIVERSAL" -eq 0 ]]; then
+  if [[ -t 0 ]]; then
+    interactive_select_agents
+  else
+    echo "No target agent selected. Use --agent or --universal, or run interactively." >&2
+    usage >&2
+    exit 1
+  fi
+fi
+
 # Validate agents
-for a in "${SELECTED_AGENTS[@]}"; do
+for a in ${SELECTED_AGENTS[@]+"${SELECTED_AGENTS[@]}"}; do
   if [[ "$a" == "all" ]]; then
     continue
   fi
@@ -145,13 +203,6 @@ for a in "${SELECTED_AGENTS[@]}"; do
     exit 1
   fi
 done
-
-# If no target selected, require explicit choice.
-if [[ ${#SELECTED_AGENTS[@]} -eq 0 && "$UNIVERSAL" -eq 0 ]]; then
-  echo "No target agent selected. Use --agent or --universal." >&2
-  usage >&2
-  exit 1
-fi
 
 # Resolve source skill directories
 SKILL_DIRS=()

@@ -28,9 +28,12 @@ npx skills add oh-summy/skills -g -y
 npx skills add oh-summy/skills --skill agnes-understand-image -a claude-code
 ```
 
-Or use the bundled installer:
+Or use the bundled installer (run without options for an interactive prompt):
 
 ```bash
+# interactive menu
+./scripts/install.sh
+
 # install for a specific agent (direct install into ~/.claude/skills/)
 ./scripts/install.sh --agent claude agnes-understand-image
 
