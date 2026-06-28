@@ -8,6 +8,11 @@ When analyzing a video, return structured information in this format.
 ## Summary
 One-sentence overview.
 
+## Keyframes analyzed
+- 00:00:28.000: what is visible
+- 00:00:29.000: what is visible
+- 00:00:30.000: what is visible
+
 ## Scene-by-scene description
 - 00:00 - 00:05: what happens
 - 00:05 - 00:10: what happens
@@ -42,6 +47,9 @@ Music, dialogue, sound effects (if inferable).
 ```json
 {
   "summary": "string",
+  "keyframes": [
+    {"timestamp": "00:00:28.000", "description": "string"}
+  ],
   "scenes": [
     {"start": "00:00", "end": "00:05", "description": "string"}
   ],
