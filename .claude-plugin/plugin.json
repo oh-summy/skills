@@ -1,0 +1,21 @@
+{
+  "name": "oh-summy-skills",
+  "description": "Cross-agent skills for real engineering by oh-summy.",
+  "version": "1.0.0",
+  "author": {
+    "name": "oh-summy",
+    "url": "https://github.com/oh-summy"
+  },
+  "homepage": "https://github.com/oh-summy/skills",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oh-summy/skills.git"
+  },
+  "license": "MIT",
+  "skills": [
+    "skills/agnes-generate-image",
+    "skills/agnes-generate-video",
+    "skills/agnes-understand-image",
+    "skills/agnes-understand-video"
+  ]
+}
