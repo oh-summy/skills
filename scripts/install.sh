@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
+# Install skills from this repo into agent skill directories.
+# Global install uses ~/.agents/skills/ as the single source of truth
+# and mirrors symlinks into ~/.claude/skills/, ~/.codex/skills/, etc.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SKILLS_DIR="$REPO_ROOT/skills"
 
-ALL_AGENTS=(claude opencode codex kimi cursor gemini)
-ALL_GLOBAL_DIRS=(
+CANONICAL_DIR="$HOME/.agents/skills"
+TARGET_DIRS=(
   "$HOME/.claude/skills"
   "$HOME/.config/opencode/skills"
   "$HOME/.codex/skills"
-  "$HOME/.agents/skills"
   "$HOME/.cursor/skills"
   "$HOME/.gemini/skills"
 )
+
 ALL_PROJECT_DIRS=(
   ".claude/skills"
   ".opencode/skills"
@@ -32,11 +35,15 @@ Install skills from this repo into agent skill directories.
 Options:
   -a, --agent <agent>   Target agent: claude, claude-code, opencode, codex,
                         kimi, kimi-code, cursor, gemini, all (default: all)
-  -g, --global          Install to user-global agent directories (default)
+  -g, --global          Install to the global canonical directory (~/.agents/skills)
+                        and mirror symlinks into other agent directories (default)
   -p, --project         Install to project-local agent directories
   -c, --copy            Copy instead of symlink
   -l, --list            List available skills and exit
   -h, --help            Show this help
+
+Global install always keeps ~/.agents/skills/ as the single source of truth.
+Run it whenever you add or remove skills to keep all agents in sync.
 EOF
 }
 
@@ -109,30 +116,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Resolve target directories
-TARGETS=()
-if [[ "$AGENT" == "all" ]]; then
-  if [[ "$SCOPE" == "global" ]]; then
-    TARGETS=("${ALL_GLOBAL_DIRS[@]}")
-  else
-    for d in "${ALL_PROJECT_DIRS[@]}"; do
-      TARGETS+=("$REPO_ROOT/$d")
-    done
-  fi
-else
-  idx=$(resolve_agent_index "$AGENT")
-  if [[ "$idx" -lt 0 ]]; then
-    echo "Unknown agent: $AGENT" >&2
-    usage >&2
-    exit 1
-  fi
-  if [[ "$SCOPE" == "global" ]]; then
-    TARGETS=("${ALL_GLOBAL_DIRS[$idx]}")
-  else
-    TARGETS=("$REPO_ROOT/${ALL_PROJECT_DIRS[$idx]}")
-  fi
-fi
-
 # Resolve source skill directories
 SKILL_DIRS=()
 if [[ -n "$SKILL_NAME" ]]; then
@@ -156,8 +139,8 @@ if [[ ${#SKILL_DIRS[@]} -eq 0 ]]; then
   exit 1
 fi
 
-# Install
-for target in "${TARGETS[@]}"; do
+install_to_dir() {
+  local target="$1"
   mkdir -p "$target"
   echo "Installing into $target"
   for src in "${SKILL_DIRS[@]}"; do
@@ -175,4 +158,29 @@ for target in "${TARGETS[@]}"; do
     fi
     echo "  $action $name"
   done
-done
+}
+
+if [[ "$SCOPE" == "global" ]]; then
+  # Install into the canonical global directory first.
+  install_to_dir "$CANONICAL_DIR"
+
+  # Then keep all supported agent directories in sync as symlinks.
+  echo ""
+  echo "Mirroring canonical skills into other agent directories..."
+  "$SCRIPT_DIR/sync_global_skills.sh"
+else
+  # Project-local install: link/copy directly into project-local agent dirs.
+  if [[ "$AGENT" == "all" ]]; then
+    for d in "${ALL_PROJECT_DIRS[@]}"; do
+      install_to_dir "$REPO_ROOT/$d"
+    done
+  else
+    idx=$(resolve_agent_index "$AGENT")
+    if [[ "$idx" -lt 0 ]]; then
+      echo "Unknown agent: $AGENT" >&2
+      usage >&2
+      exit 1
+    fi
+    install_to_dir "$REPO_ROOT/${ALL_PROJECT_DIRS[$idx]}"
+  fi
+fi
