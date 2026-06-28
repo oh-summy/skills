@@ -17,6 +17,8 @@ Understand a local video by sampling frames and analyzing them with `agnes-2.0-f
 
 - `--video`: Path to a local video file or a publicly accessible video URL.
 - `--prompt`: Analysis instruction.
+- `--timestamp`: Analyze around a specific timestamp, e.g. `30`, `30.5`, `00:00:30`, `0:30`.
+- `--window`: Seconds around `--timestamp` to sample. Default 2.
 - `--frames`: Number of frames to sample. Default 5.
 - `--format`: `text`, `structured` (default), or `json`.
 - `--json`: Alias for `--format json`.
@@ -30,9 +32,11 @@ Understand a local video by sampling frames and analyzing them with `agnes-2.0-f
    ```bash
    bash scripts/understand_video.sh --video ./clip.mp4 --prompt "Summarize the main events in this video"
    ```
-3. The script downloads the video if needed, extracts evenly spaced frames, sends them to `agnes-2.0-flash`, and returns the analysis.
+3. The script downloads the video if needed, extracts frames, sends them to `agnes-2.0-flash`, and returns the analysis.
 
-## Example
+## Examples
+
+Analyze the whole video:
 
 ```bash
 bash scripts/understand_video.sh \
@@ -41,11 +45,22 @@ bash scripts/understand_video.sh \
   --json
 ```
 
+Analyze what happens around the 30-second mark:
+
+```bash
+bash scripts/understand_video.sh \
+  --video ./demo.mp4 \
+  --timestamp 30 \
+  --window 2 \
+  --prompt "What happens around the 30-second mark?"
+```
+
 ## Output format
 
 By default the model returns a structured analysis including:
 
 - Summary
+- Keyframes analyzed (with timestamps)
 - Scene-by-scene description
 - Settings
 - Characters / actions
@@ -54,6 +69,8 @@ By default the model returns a structured analysis including:
 - Mood / tone
 - Audio description
 - Metadata (duration, resolution, frame rate, format)
+
+The script also prints the extracted keyframe timestamps so you know exactly which moments were analyzed.
 
 Use `--format json` to get machine-readable JSON. See `references/output-schema.md` for the full schema.
 
