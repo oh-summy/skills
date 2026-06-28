@@ -6,7 +6,7 @@ Cross-agent skills for [Claude Code](https://claude.ai/code), [OpenCode](https:/
 
 Currently includes [Agnes AI](https://agnes-ai.com) multimodal skills for image and video workflows. More skills will be added over time.
 
-[简体中文](./README.zh-CN.md)
+**Languages:** [English](./README.md) | [简体中文](./README.zh-CN.md)
 
 ## Quick start
 
