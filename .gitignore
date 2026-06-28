@@ -1,0 +1,21 @@
+.DS_Store
+.env
+.env.local
+node_modules/
+*.log
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# Project-local agent skill directories
+.claude/
+.agents/
+.opencode/
+.codex/
+.cursor/
+.gemini/
+.kimi/
+.windsurf/
+
